@@ -1,16 +1,18 @@
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+require('dotenv').config();
+const { initializeApp } = require('firebase/app');
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDRTtqe0QR7HQO099mBDy7eyCd4wAya7D0",
-  authDomain: "rfilmes-b6dae.firebaseapp.com",
-  databaseURL: "https://rfilmes-b6dae-default-rtdb.firebaseio.com",
-  projectId: "rfilmes-b6dae",
-  storageBucket: "rfilmes-b6dae.firebasestorage.app",
-  messagingSenderId: "178796516518",
-  appId: "1:178796516518:web:5ce40a615d4cf0784a9067",
-  measurementId: "G-YY7JL98HQ9"
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  databaseURL: process.env.FIREBASE_DATABASE_URL,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
+  measurementId: process.env.FIREBASE_MEASUREMENT_ID
 };
 
+// Inicializando o Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+
+module.exports = app;
