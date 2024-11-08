@@ -1,5 +1,5 @@
 const { getFirestore, collection, addDoc } = require('firebase/firestore');
-const app = require('../firebaseConfig');
+const app = require('../database/db');
 
 const db = getFirestore(app);
 
