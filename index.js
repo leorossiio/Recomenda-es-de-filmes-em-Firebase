@@ -11,9 +11,9 @@ app.use(cors());
 app.use(express.json());
 
 // Rotas
-app.post('/usuarios', usuariosController.cadastrarUsuario);
+app.use('/usuarios', usuariosController);
 app.use('/filmes', filmesController)
-app.post('/indicacoes', indicacoesController.indicarFilme);
+app.use('/indicacoes', indicacoesController);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
