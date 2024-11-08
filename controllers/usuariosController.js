@@ -1,10 +1,11 @@
 const { getFirestore, collection, addDoc } = require('firebase/firestore');
 const app = require('../database/db'); // Importa o arquivo de configuração do Firebase
+const express = require('express');
 
 const db = getFirestore(app); // Obtém a instância do Firestore
+const router = express.Router();
 
-// Função para cadastrar um usuário
-exports.cadastrarUsuario = async (req, res) => {
+router.post('/', async (req, res) => {
     const { nome, email, senha } = req.body; // Dados do usuário
 
     try {
@@ -21,4 +22,6 @@ exports.cadastrarUsuario = async (req, res) => {
         // Retorna erro caso algum problema ocorra durante o cadastro
         res.status(400).json({ error: error.message });
     }
-};
+})
+
+module.exports = router;
