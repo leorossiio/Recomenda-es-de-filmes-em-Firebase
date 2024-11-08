@@ -1,5 +1,5 @@
 const { getAuth, createUserWithEmailAndPassword } = require('firebase/auth');
-const app = require('../firebaseConfig');
+const app = require('../database/db');
 
 const auth = getAuth(app);
 

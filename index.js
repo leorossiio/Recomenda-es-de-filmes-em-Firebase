@@ -12,7 +12,7 @@ app.use(express.json());
 
 // Rotas
 app.post('/usuarios', usuariosController.cadastrarUsuario);
-app.post('/filmes', filmesController.cadastrarFilme);
+app.use('/filmes', filmesController)
 app.post('/indicacoes', indicacoesController.indicarFilme);
 
 const PORT = process.env.PORT || 3000;
