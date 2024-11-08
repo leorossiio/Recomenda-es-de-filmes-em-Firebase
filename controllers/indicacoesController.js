@@ -1,61 +1,53 @@
-const { getFirestore, collection, addDoc } = require('firebase/firestore');
-
+const { getFirestore, collection, getDocs, doc, getDoc } = require('firebase/firestore');
 const app = require('../database/db');
 const express = require('express');
 
 const db = getFirestore(app);
 const router = express.Router();
 
-exports.recomendarFilmes = async (req, res) => {
-    const { usuarioId } = req.params;
+// Rota para obter recomendações de filmes com base nos gêneros e idade do usuário
+router.get('/recomendar/:idUsuario', async (req, res) => {
+    const { idUsuario } = req.params;
 
     try {
-        // Obter as preferências do usuário
-        const usuarioQuery = query(collection(db, 'usuarios'), where('id', '==', usuarioId));
-        const usuarioSnapshot = await getDocs(usuarioQuery);
+        // Buscando o usuário para obter seus gêneros favoritos e idade
+        const usuarioRef = doc(db, 'usuarios', idUsuario);
+        const usuarioSnap = await getDoc(usuarioRef);
 
-        if (usuarioSnapshot.empty) {
+        if (!usuarioSnap.exists()) {
             return res.status(404).json({ message: 'Usuário não encontrado.' });
         }
 
-        const usuarioData = usuarioSnapshot.docs[0].data();
-        const preferencias = usuarioData.preferencias;
-        const idade = usuarioData.idade;
+        const usuarioData = usuarioSnap.data();
+        const { genero: generosFavoritos, idade } = usuarioData;
 
-        if (!preferencias || preferencias.length === 0) {
-            return res.status(404).json({ message: 'Nenhuma preferência encontrada para este usuário.' });
-        }
+        // Consultando todos os filmes na coleção
+        const filmesRef = collection(db, 'filmes');
+        const filmesSnapshot = await getDocs(filmesRef);
 
-        // Definir a classificação indicativa máxima com base na idade do usuário
-        let classificacaoMaxima;
-        if (idade >= 18) {
-            classificacaoMaxima = 18;
-        } else if (idade >= 16) {
-            classificacaoMaxima = 16;
-        } else if (idade >= 14) {
-            classificacaoMaxima = 14;
-        } else if (idade >= 12) {
-            classificacaoMaxima = 12;
-        } else if (idade >= 10) {
-            classificacaoMaxima = 10;
-        } else {
-            classificacaoMaxima = 0; // Para idades menores que 10
-        }
+        const indicacoes = {};
+        
+        // Filtrando filmes por gêneros favoritos e classificação indicativa
+        filmesSnapshot.forEach((doc) => {
+            const filme = doc.data();
 
-        // Obter todos os filmes
-        const filmesSnapshot = await getDocs(collection(db, 'filmes'));
+            // Verifica se o gênero do filme está nos favoritos e se a idade é suficiente para a classificação indicativa
+            const podeAssistir = 
+                filme.classificacao === 'L' ||  // "L" significa livre
+                idade >= filme.classificacao;
 
-        const recomendacoes = [];
-        filmesSnapshot.forEach(doc => {
-            const filmeData = doc.data();
-            // Verificar se o gênero do filme está nas preferências do usuário e se a classificação indicativa é adequada
-            if (preferencias.includes(filmeData.genero) && filmeData.classificacaoIndicativa <= classificacaoMaxima) {
-                recomendacoes.push(filmeData);
+            if (generosFavoritos.includes(filme.genero) && podeAssistir) {
+                if (!indicacoes[filme.genero]) {
+                    indicacoes[filme.genero] = [];
+                }
+                indicacoes[filme.genero].push(filme.titulo);
             }
         });
 
-        res.status(200).json(recomendacoes);
+        res.status(200).json({ indicacoes });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
-};
+});
+
+module.exports = router;

@@ -56,21 +56,21 @@ router.patch('/:id', async (req, res) => {
 })
 
 router.get('/:id', async (req, res) => {
-    const { id } = req.params
-
+    const { id } = req.params;
     try {
-        const docRef = doc(db, 'usuarios', id)
-        const docSnap = await getDoc(docRef)
+        const docRef = doc(db, 'usuarios', id);
+        const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-            res.status(200).json(docSnap.data())
+            const userData = docSnap.data();
+            res.status(200).json(userData);
         } else {
-            res.status(404).json({ message: 'Usuário não encontrado!' })
+            res.status(404).json({ message: 'Usuário não encontrado.' });
         }
     } catch (error) {
-        res.status(400).json({ error: error.message })
+        res.status(400).json({ error: error.message });
     }
-})
+});
 
 router.get('/', async (req, res) => {
     try {
