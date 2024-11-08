@@ -1,14 +1,24 @@
-const { getAuth, createUserWithEmailAndPassword } = require('firebase/auth');
-const app = require('../database/db');
+const { getFirestore, collection, addDoc } = require('firebase/firestore');
+const app = require('../database/db'); // Importa o arquivo de configuração do Firebase
 
-const auth = getAuth(app);
+const db = getFirestore(app); // Obtém a instância do Firestore
 
+// Função para cadastrar um usuário
 exports.cadastrarUsuario = async (req, res) => {
-    const { email, password } = req.body;
+    const { nome, email, senha } = req.body; // Dados do usuário
+
     try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        res.status(201).json({ message: 'Usuário cadastrado com sucesso!', userId: userCredential.user.uid });
+        // Cria um novo documento na coleção 'usuarios' no Firestore
+        const docRef = await addDoc(collection(db, 'usuarios'), {
+            nome,
+            email,
+            senha // Lembre-se de que salvar a senha em texto simples não é recomendado para produção
+        });
+
+        // Retorna a resposta com sucesso e o ID do usuário cadastrado
+        res.status(201).json({ message: 'Usuário cadastrado com sucesso!', usuarioId: docRef.id });
     } catch (error) {
+        // Retorna erro caso algum problema ocorra durante o cadastro
         res.status(400).json({ error: error.message });
     }
 };
