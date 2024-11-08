@@ -1,18 +1,21 @@
+// Indicacoes [0 == L, 10, 12, 14, 16 18] -> Fazer essa verificação na idade
+
 const { getFirestore, collection, addDoc, doc, deleteDoc, updateDoc, getDoc, getDocs } = require('firebase/firestore');
-const app = require('../database/db'); 
-const express = require('express'); 
+const app = require('../database/db');
+const express = require('express');
 
 const db = getFirestore(app);
 const router = express.Router();
 
 // Cadastrar filme (POST)
-router.post('/', async (req, res) => { 
-    const { titulo, avaliacao, genero } = req.body;
+router.post('/', async (req, res) => {
+    const { titulo, avaliacao, genero, classificacao } = req.body;
     try {
         const docRef = await addDoc(collection(db, 'filmes'), {
             titulo,
             avaliacao,
-            genero
+            genero,
+            classificacao
         });
         res.status(201).json({ message: 'Filme cadastrado com sucesso!', filmeId: docRef.id });
     } catch (error) {
@@ -22,7 +25,7 @@ router.post('/', async (req, res) => {
 
 // Deletar filme (DELETE)
 router.delete('/:id', async (req, res) => {
-    const { id } = req.params; 
+    const { id } = req.params;
     try {
         await deleteDoc(doc(db, 'filmes', id));
         res.status(200).json({ message: 'Filme deletado com sucesso!' });
@@ -34,13 +37,14 @@ router.delete('/:id', async (req, res) => {
 // Atualizar filme (PATCH)
 router.patch('/:id', async (req, res) => {
     const { id } = req.params;
-    const { titulo, avaliacao, genero } = req.body; 
+    const { titulo, avaliacao, genero, classificacao } = req.body;
     try {
-        const filmeRef = doc(db, 'filmes', id); 
+        const filmeRef = doc(db, 'filmes', id);
         await updateDoc(filmeRef, {
-            titulo: titulo || undefined, 
+            titulo: titulo || undefined,
             avaliacao: avaliacao || undefined,
-            genero: genero || undefined
+            genero: genero || undefined,
+            classificacao: classificacao || undefined
         });
         res.status(200).json({ message: 'Filme atualizado com sucesso!' });
     } catch (error) {
@@ -66,7 +70,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Obter todos os filmes (GET)
-router.get('/', async (req, res) => { 
+router.get('/', async (req, res) => {
     try {
         const querySnapshot = await getDocs(collection(db, 'filmes'));
         const filmes = [];
