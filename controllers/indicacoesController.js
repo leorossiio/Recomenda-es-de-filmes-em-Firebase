@@ -6,7 +6,7 @@ const db = getFirestore(app);
 const router = express.Router();
 
 // Rota para obter recomendações de filmes com base nos gêneros e idade do usuário
-router.get('/recomendar/:idUsuario', async (req, res) => {
+router.get('/:idUsuario', async (req, res) => {
     const { idUsuario } = req.params;
 
     try {

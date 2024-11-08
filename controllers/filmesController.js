@@ -1,4 +1,4 @@
-// Indicacoes [0 == L, 10, 12, 14, 16 18] -> Fazer essa verificação na idade
+// Indicacoes [L, 10, 12, 14, 16 18] -> Fazer essa verificação na idade
 
 const { getFirestore, collection, addDoc, doc, deleteDoc, updateDoc, getDoc, getDocs } = require('firebase/firestore');
 const app = require('../database/db');
@@ -11,10 +11,11 @@ const router = express.Router();
 router.post('/', async (req, res) => {
     const { titulo, avaliacao, genero, classificacao } = req.body;
     try {
+        const generos = Array.isArray(genero) ? genero : [genero]
         const docRef = await addDoc(collection(db, 'filmes'), {
             titulo,
             avaliacao,
-            genero,
+            genero: generos,
             classificacao
         });
         res.status(201).json({ message: 'Filme cadastrado com sucesso!', filmeId: docRef.id });
@@ -36,21 +37,25 @@ router.delete('/:id', async (req, res) => {
 
 // Atualizar filme (PATCH)
 router.patch('/:id', async (req, res) => {
-    const { id } = req.params;
-    const { titulo, avaliacao, genero, classificacao } = req.body;
+    const { id } = req.params
+    const { titulo, avaliacao, genero, classificacao } = req.body
+
     try {
-        const filmeRef = doc(db, 'filmes', id);
-        await updateDoc(filmeRef, {
-            titulo: titulo || undefined,
-            avaliacao: avaliacao || undefined,
-            genero: genero || undefined,
-            classificacao: classificacao || undefined
-        });
-        res.status(200).json({ message: 'Filme atualizado com sucesso!' });
+        const filmeRef = doc(db, 'filmes', id)
+
+        const updates = {};
+        if (titulo) updates.titulo = titulo
+        if (avaliacao) updates.avaliacao = avaliacao
+        if (genero) updates.genero = genero
+        if (classificacao) updates.classificacao = classificacao
+
+        await updateDoc(filmeRef, updates)
+
+        res.status(200).json({ message: 'Filme atualizado com sucesso!' })
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(400).json({ error: error.message })
     }
-});
+})
 
 // Obter um filme (GET by ID)
 router.get('/:id', async (req, res) => {
