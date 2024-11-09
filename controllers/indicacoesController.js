@@ -26,25 +26,38 @@ router.get('/:idUsuario', async (req, res) => {
         const filmesSnapshot = await getDocs(filmesRef);
 
         const indicacoes = {};
-        
+
         // Filtrando filmes por gêneros favoritos e classificação indicativa
         filmesSnapshot.forEach((doc) => {
             const filme = doc.data();
 
             // Verifica se o gênero do filme está nos favoritos e se a idade é suficiente para a classificação indicativa
-            const podeAssistir = 
-                filme.classificacao === 'L' ||  // "L" significa livre
+            const podeAssistir =
+                filme.classificacao === 'Livre' ||
                 idade >= filme.classificacao;
 
-            if (generosFavoritos.includes(filme.genero) && podeAssistir) {
-                if (!indicacoes[filme.genero]) {
-                    indicacoes[filme.genero] = [];
+            // Verifica se pelo menos um gênero do filme está nos gêneros favoritos do usuário
+            const generoMatch = filme.genero.some(genero => generosFavoritos.includes(genero));
+
+            if (generoMatch && podeAssistir) {
+                // Formata o array de gêneros em uma string com vírgulas e espaços
+                const generoFormatado = filme.genero.join(', ');
+
+                // Adiciona o filme à lista de indicações para o gênero formatado
+                if (!indicacoes[generoFormatado]) {
+                    indicacoes[generoFormatado] = [];
                 }
-                indicacoes[filme.genero].push(filme.titulo);
+                indicacoes[generoFormatado].push(filme);
             }
         });
 
+        for (const genero in indicacoes) {
+            indicacoes[genero].sort((a, b) => b.avaliacao - a.avaliacao); // Ordenação decrescente
+            indicacoes[genero] = indicacoes[genero].slice(0, 3); // Limita a 3 filmes
+        }
+
         res.status(200).json({ indicacoes });
+
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
