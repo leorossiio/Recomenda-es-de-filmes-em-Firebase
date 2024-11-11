@@ -55,6 +55,7 @@ router.patch('/:id', async (req, res) => {
     }
 })
 
+// Listar por id (GET)
 router.get('/:id', async (req, res) => {
     const { id } = req.params;
     try {
@@ -72,6 +73,7 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+// Listar todos (GET)
 router.get('/', async (req, res) => {
     try {
         const querySnapshot = await getDocs(collection(db, 'usuarios'))
@@ -81,10 +83,49 @@ router.get('/', async (req, res) => {
             usuarios.push({ id: doc.id, ...doc.data() })
         })
 
-        res.status(200).json(usuarios)
+        res.status(200).json({ quantidade: usuarios.length + " usuário(s)", usuarios });
     } catch (error) {
         res.status(400).json({ error: error.message })
     }
 })
+
+// Filtro por nome (GET)
+router.get('/nome/:nome', async (req, res) => {
+    const { nome } = req.params;
+    try {
+        const querySnapshot = await getDocs(collection(db, 'usuarios'));
+        const usuarios = [];
+
+        querySnapshot.forEach((doc) => {
+            const usuario = { id: doc.id, ...doc.data() };
+            if (usuario.nome.toLowerCase().includes(nome.toLowerCase())) {
+                usuarios.push(usuario);
+            }
+        });
+        res.status(200).json({ quantidade: usuarios.length + " usuário(s)", usuarios });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+// Filtro por idade (GET)
+router.get('/idade/:idade', async (req, res) => {
+    const { idade } = req.params;
+    try {
+        const querySnapshot = await getDocs(collection(db, 'usuarios'));
+        const usuarios = [];
+
+        querySnapshot.forEach((doc) => {
+            const usuario = { id: doc.id, ...doc.data() };
+            if (usuario.idade === parseInt(idade)) {
+                usuarios.push(usuario);
+            }
+        });
+        res.status(200).json({ quantidade: usuarios.length + " usuário(s)", usuarios });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
 
 module.exports = router

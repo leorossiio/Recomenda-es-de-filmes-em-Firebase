@@ -79,10 +79,104 @@ router.get('/', async (req, res) => {
     try {
         const querySnapshot = await getDocs(collection(db, 'filmes'));
         const filmes = [];
+
         querySnapshot.forEach((doc) => {
             filmes.push({ id: doc.id, ...doc.data() });
         });
-        res.status(200).json(filmes);
+
+        res.status(200).json({ quantidade: filmes.length + " filme(s)", filmes });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+// Listar por avaliação (GET)
+router.get('/avaliacao/:avaliacao', async (req, res) => {
+    const { avaliacao } = req.params;
+
+    if (avaliacao < 0 || avaliacao > 5) {
+        return res.status(400).json({ error: 'Avaliação inválida. As avaliações válidas são entre 0 e 5.' });
+    }
+
+    try {
+        const querySnapshot = await getDocs(collection(db, 'filmes'));
+        const filmes = [];
+
+        querySnapshot.forEach((doc) => {
+            const filme = { id: doc.id, ...doc.data() };
+            if (filme.avaliacao == avaliacao) {
+                filmes.push(filme);
+            }
+        });
+
+        res.status(200).json({ quantidade: filmes.length + " filme(s)", filmes });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+// Listar por classificação (GET)
+router.get('/classificacao/:classificacao', async (req, res) => {
+    const { classificacao } = req.params;
+
+    const classificacoesValidas = ['livre', '10', '12', '14', '16', '18'];
+
+    if (!classificacoesValidas.includes(classificacao.toLowerCase())) {
+        return res.status(400).json({ error: 'Classificação inválida. As classificações válidas são: Livre, 10, 12, 14, 16, 18.' });
+    }
+
+    try {
+        const querySnapshot = await getDocs(collection(db, 'filmes'));
+        const filmes = [];
+
+        querySnapshot.forEach((doc) => {
+            const filme = { id: doc.id, ...doc.data() };
+            if (filme.classificacao.toLowerCase().includes(classificacao.toLowerCase())) {
+                filmes.push(filme);
+            }
+        });
+
+        res.status(200).json({ quantidade: filmes.length + " filme(s)", filmes });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+// Listar por genero (GET)
+router.get('/genero/:genero', async (req, res) => {
+    const { genero } = req.params;
+    try {
+        const querySnapshot = await getDocs(collection(db, 'filmes'));
+        const filmes = [];
+
+        querySnapshot.forEach((doc) => {
+            const filme = { id: doc.id, ...doc.data() };
+            if (filme.genero.includes(genero)) {
+                filmes.push(filme);
+            }
+        });
+
+        res.status(200).json({ quantidade: filmes.length + " filme(s)", filmes });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+// Listar por titulo (GET)
+router.get('/titulo/:titulo', async (req, res) => {
+    const { titulo } = req.params;
+    try {
+        const querySnapshot = await getDocs(collection(db, 'filmes'));
+        const filmes = [];
+
+        querySnapshot.forEach((doc) => {
+            const filme = { id: doc.id, ...doc.data() };
+            if (filme.titulo.toLowerCase().includes(titulo.toLowerCase())) {
+                filmes.push(filme);
+            }
+        });
+
+        res.status(200).json({ quantidade: filmes.length + " filme(s)", filmes });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
